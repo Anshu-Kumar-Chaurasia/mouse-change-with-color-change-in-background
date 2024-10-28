@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Move Color Change with Related Gradient Background</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #000000, #006778); /* Black to Dark Cyan gradient */
+        }
+
+        #demoDIV {
+            width: 300px;
+            height: 200px;
+            border: 2px solid #000;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            transition: background 0.3s, border-color 0.3s, transform 0.3s;
+            background: linear-gradient(135deg, #ff6b6b, #ffbb6b); /* Initial gradient */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Shadow effect */
+        }
+
+        #colorHistory {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 300px;
+        }
+
+        .colorSquare {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #000;
+            margin: 2px;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: #006778; /* Dark Cyan button */
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s; /* Button hover animation */
+        }
+
+        button:hover {
+            background: #00555f; /* Darker shade on hover */
+            transform: scale(1.05); /* Scale effect on hover */
+        }
+
+        button:active {
+            transform: scale(0.95); /* Shrink effect on click */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="demoDIV" onmousemove="changeColor()">Move your mouse here!</div>
+    <div id="colorHistory"></div>
+    <button onclick="resetHistory()">Reset Color History</button>
+
+    <audio id="colorChangeSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+    <script>
+        const colorHistory = [];
+        const historySize = 5;
+
+        function changeColor() {
+            // Generate a random color
+            const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            const demoDiv = document.getElementById("demoDIV");
+            const colorChangeSound = document.getElementById("colorChangeSound");
+
+            // Update background and border color with a gradient
+            demoDiv.style.background = `linear-gradient(135deg, ${randomColor}, #ffbb6b)`;
+            demoDiv.style.borderColor = randomColor;
+            demoDiv.innerText = `Color: ${randomColor}`;
+
+            // Update body background with a related gradient
+            document.body.style.background = generateGradient(randomColor);
+
+            // Play sound effect
+            colorChangeSound.currentTime = 0; // Reset sound to play from the start
+            colorChangeSound.play();
+
+            // Add to color history
+            colorHistory.push(randomColor);
+            if (colorHistory.length > historySize) {
+                colorHistory.shift(); // Remove oldest color if history exceeds size
+            }
+            updateColorHistory();
+        }
+
+        function generateGradient(foregroundColor) {
+            // Simple function to create a gradient based on the foreground color
+            const complementaryColor = getComplementaryColor(foregroundColor);
+            return `linear-gradient(135deg, ${foregroundColor}, ${complementaryColor})`;
+        }
+
+        function getComplementaryColor(color) {
+            // Convert hex color to RGB
+            const r = parseInt(color.slice(1, 3), 16);
+            const g = parseInt(color.slice(3, 5), 16);
+            const b = parseInt(color.slice(5, 7), 16);
+
+            // Calculate the complementary color
+            const compR = 255 - r;
+            const compG = 255 - g;
+            const compB = 255 - b;
+
+            // Convert back to hex and return
+            return `#${((1 << 24) + (compR << 16) + (compG << 8) + compB).toString(16).slice(1).toUpperCase()}`;
+        }
+
+        function updateColorHistory() {
+            const historyDiv = document.getElementById("colorHistory");
+            historyDiv.innerHTML = ''; // Clear current history display
+            colorHistory.forEach(color => {
+                const colorSquare = document.createElement('div');
+                colorSquare.className = 'colorSquare';
+                colorSquare.style.backgroundColor = color;
+                historyDiv.appendChild(colorSquare);
+            });
+        }
+
+        function resetHistory() {
+            colorHistory.length = 0; // Clear history array
+            updateColorHistory(); // Update displayed history
+        }
+    </script>
+</body>
+
+</html>
